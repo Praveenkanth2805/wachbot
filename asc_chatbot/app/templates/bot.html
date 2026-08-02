@@ -8,18 +8,47 @@
     <div class="max-w-lg mx-auto bg-white p-6 rounded shadow">
         <h1 class="text-2xl font-bold mb-4">Test Chatbot</h1>
         <div id="chat" class="h-64 overflow-y-auto border p-4 mb-4 bg-gray-50">
-            <div>Bot: Hello! Type a message.</div>
+            <div class="bot-msg"><strong>Bot:</strong> Hello! Type a message.</div>
         </div>
-        <form id="chatForm" hx-post="/bot/message" hx-target="#chat" hx-swap="beforeend" hx-on::after-request="document.getElementById('msgInput').value=''">
-            <input type="text" name="message" id="msgInput" class="border rounded w-full p-2 mb-2" placeholder="Type your message...">
+        <form id="chatForm">
+            <input type="text" name="message" id="msgInput" class="border rounded w-full p-2 mb-2" placeholder="Type your message..." required>
             <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded w-full">Send</button>
         </form>
-        <script>
-            document.body.addEventListener('htmx:afterRequest', function(evt) {
-                // scroll down
-                document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-            });
-        </script>
     </div>
+
+    <script>
+        document.getElementById('chatForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const msgInput = document.getElementById('msgInput');
+            const message = msgInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            const chatDiv = document.getElementById('chat');
+            const userMsg = document.createElement('div');
+            userMsg.innerHTML = `<strong>You:</strong> ${message}`;
+            chatDiv.appendChild(userMsg);
+
+            // Clear input
+            msgInput.value = '';
+
+            // Send to server
+            const formData = new FormData();
+            formData.append('message', message);
+            const response = await fetch('/bot/message', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            // Add bot reply
+            const botMsg = document.createElement('div');
+            botMsg.innerHTML = `<strong>Bot:</strong> ${data.reply}`;
+            chatDiv.appendChild(botMsg);
+
+            // Scroll to bottom
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        });
+    </script>
 </body>
 </html>
