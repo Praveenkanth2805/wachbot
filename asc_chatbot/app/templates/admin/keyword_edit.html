@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Edit Keyword</h1>
+<div class="bg-white p-6 rounded shadow">
+    <form method="post" class="grid grid-cols-2 gap-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Pattern</label>
+            <input type="text" name="pattern" value="{{ keyword.pattern }}" class="border rounded w-full p-2" required>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Match Type</label>
+            <select name="match_type" class="border rounded w-full p-2">
+                <option value="exact" {% if keyword.match_type.value == 'exact' %}selected{% endif %}>Exact</option>
+                <option value="contains" {% if keyword.match_type.value == 'contains' %}selected{% endif %}>Contains</option>
+                <option value="starts" {% if keyword.match_type.value == 'starts' %}selected{% endif %}>Starts With</option>
+                <option value="ends" {% if keyword.match_type.value == 'ends' %}selected{% endif %}>Ends With</option>
+                <option value="regex" {% if keyword.match_type.value == 'regex' %}selected{% endif %}>Regex</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Priority</label>
+            <input type="number" name="priority" value="{{ keyword.priority }}" class="border rounded w-full p-2">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Language</label>
+            <select name="language" class="border rounded w-full p-2">
+                <option value="en" {% if keyword.language == 'en' %}selected{% endif %}>English</option>
+                <option value="ta" {% if keyword.language == 'ta' %}selected{% endif %}>Tamil</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Active</label>
+            <input type="checkbox" name="is_active" value="true" {% if keyword.is_active %}checked{% endif %}>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Category</label>
+            <select name="category_id" class="border rounded w-full p-2">
+                <option value="">No Category</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if keyword.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <h2 class="col-span-2 text-lg font-semibold mt-4">Response (first)</h2>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Response Type</label>
+            <select name="response_type" class="border rounded w-full p-2">
+                <option value="text" {% if keyword.responses and keyword.responses[0].type.value == 'text' %}selected{% endif %}>Text</option>
+                <option value="image" {% if keyword.responses and keyword.responses[0].type.value == 'image' %}selected{% endif %}>Image</option>
+                <option value="pdf" {% if keyword.responses and keyword.responses[0].type.value == 'pdf' %}selected{% endif %}>PDF</option>
+                <option value="video" {% if keyword.responses and keyword.responses[0].type.value == 'video' %}selected{% endif %}>Video</option>
+                <option value="audio" {% if keyword.responses and keyword.responses[0].type.value == 'audio' %}selected{% endif %}>Audio</option>
+                <option value="document" {% if keyword.responses and keyword.responses[0].type.value == 'document' %}selected{% endif %}>Document</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Response Text</label>
+            <input type="text" name="response_text" value="{{ keyword.responses[0].text if keyword.responses and keyword.responses[0].text else '' }}" class="border rounded w-full p-2">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Media ID (if any)</label>
+            <input type="number" name="response_media_id" value="{{ keyword.responses[0].media_id if keyword.responses and keyword.responses[0].media_id else '' }}" class="border rounded w-full p-2">
+        </div>
+
+        <div class="col-span-2 flex gap-4 mt-4">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Update</button>
+            <a href="/admin/keywords" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
