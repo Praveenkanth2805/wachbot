@@ -23,16 +23,13 @@
             const message = msgInput.value.trim();
             if (!message) return;
 
-            // Add user message
             const chatDiv = document.getElementById('chat');
+            // User message
             const userMsg = document.createElement('div');
             userMsg.innerHTML = `<strong>You:</strong> ${message}`;
             chatDiv.appendChild(userMsg);
-
-            // Clear input
             msgInput.value = '';
 
-            // Send to server
             const formData = new FormData();
             formData.append('message', message);
             const response = await fetch('/bot/message', {
@@ -41,12 +38,68 @@
             });
             const data = await response.json();
 
-            // Add bot reply
-            const botMsg = document.createElement('div');
-            botMsg.innerHTML = `<strong>Bot:</strong> ${data.reply}`;
-            chatDiv.appendChild(botMsg);
+            // Container for bot reply
+            const botMsgDiv = document.createElement('div');
+            botMsgDiv.className = 'bot-msg';
 
-            // Scroll to bottom
+            // Add text
+            if (data.reply) {
+                const strong = document.createElement('strong');
+                strong.textContent = 'Bot: ';
+                botMsgDiv.appendChild(strong);
+                const textNode = document.createTextNode(data.reply);
+                botMsgDiv.appendChild(textNode);
+            }
+
+            // Add media
+            if (data.media_url) {
+                let mediaEl;
+                const mime = data.media_type || '';
+                if (mime.startsWith('image/')) {
+                    mediaEl = document.createElement('img');
+                    mediaEl.src = data.media_url;
+                    mediaEl.className = 'max-w-full h-auto mt-2';
+                } else if (mime.startsWith('video/')) {
+                    mediaEl = document.createElement('video');
+                    mediaEl.src = data.media_url;
+                    mediaEl.controls = true;
+                    mediaEl.className = 'max-w-full mt-2';
+                } else if (mime.startsWith('audio/')) {
+                    mediaEl = document.createElement('audio');
+                    mediaEl.src = data.media_url;
+                    mediaEl.controls = true;
+                    mediaEl.className = 'w-full mt-2';
+                } else if (mime === 'application/pdf') {
+                    mediaEl = document.createElement('a');
+                    mediaEl.href = data.media_url;
+                    mediaEl.textContent = '📄 View PDF';
+                    mediaEl.target = '_blank';
+                    mediaEl.className = 'text-blue-600 underline mt-2 inline-block';
+                } else {
+                    mediaEl = document.createElement('a');
+                    mediaEl.href = data.media_url;
+                    mediaEl.textContent = `📎 Download file (${mime})`;
+                    mediaEl.target = '_blank';
+                    mediaEl.className = 'text-blue-600 underline mt-2 inline-block';
+                }
+                if (mediaEl) {
+                    // If no text, add "Bot:" label
+                    if (!data.reply) {
+                        const label = document.createElement('strong');
+                        label.textContent = 'Bot: ';
+                        botMsgDiv.appendChild(label);
+                    }
+                    botMsgDiv.appendChild(document.createElement('br'));
+                    botMsgDiv.appendChild(mediaEl);
+                }
+            }
+
+            // Fallback if nothing
+            if (!data.reply && !data.media_url) {
+                botMsgDiv.innerHTML = `<strong>Bot:</strong> Sorry, no reply.`;
+            }
+
+            chatDiv.appendChild(botMsgDiv);
             chatDiv.scrollTop = chatDiv.scrollHeight;
         });
     </script>

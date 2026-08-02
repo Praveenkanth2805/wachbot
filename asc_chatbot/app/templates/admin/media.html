@@ -7,13 +7,28 @@
         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Upload</button>
     </form>
 </div>
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-    {% for media in media_files %}
-    <div class="bg-white p-4 rounded shadow">
-        <p><strong>{{ media.original_name }}</strong></p>
-        <p class="text-sm text-gray-500">{{ media.mime_type }} - {{ media.size }} bytes</p>
-        <a href="/admin/media/{{ media.id }}/delete" onclick="return confirm('Delete?')" class="text-red-600 hover:text-red-800 text-sm">Delete</a>
-    </div>
-    {% endfor %}
-</div>
+<table class="min-w-full bg-white shadow rounded">
+    <thead>
+        <tr>
+            <th class="py-2 px-4 border-b">ID</th>   <!-- புதிய நெடுவரிசை -->
+            <th class="py-2 px-4 border-b">File Name</th>
+            <th class="py-2 px-4 border-b">MIME Type</th>
+            <th class="py-2 px-4 border-b">Size (bytes)</th>
+            <th class="py-2 px-4 border-b">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for media in media_files %}
+        <tr>
+            <td class="py-2 px-4 border-b">{{ media.id }}</td>
+            <td class="py-2 px-4 border-b">{{ media.original_name }}</td>
+            <td class="py-2 px-4 border-b">{{ media.mime_type }}</td>
+            <td class="py-2 px-4 border-b">{{ media.size }}</td>
+            <td class="py-2 px-4 border-b">
+                <a href="/admin/media/{{ media.id }}/delete" onclick="return confirm('Delete?')" class="text-red-600 hover:text-red-800">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

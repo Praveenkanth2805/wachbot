@@ -7,6 +7,8 @@ import logging
 import os
 from app.database import engine, Base, SessionLocal
 from app.core.init_admin import create_default_admin
+from fastapi.staticfiles import StaticFiles
+
 
 # Create logs directory if not exists
 os.makedirs(settings.LOG_DIR, exist_ok=True)
@@ -35,6 +37,7 @@ finally:
 
 app = FastAPI(title=settings.APP_NAME)
 
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 app.include_router(webhook_router)

@@ -40,5 +40,32 @@
             </div>
         </div>
     </div>
+    <!-- Toast Container -->
+<div id="toast" class="fixed top-5 right-5 z-50 hidden bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-opacity duration-300">
+    <span id="toastMessage"></span>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+        if (msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.textContent = msg;
+            toast.classList.remove('hidden');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300);
+            }, 3000);
+            // Remove msg from URL to avoid showing again on refresh
+            const newUrl = window.location.pathname;
+            history.replaceState(null, '', newUrl);
+        }
+    });
+</script>
 </body>
 </html>
