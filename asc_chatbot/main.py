@@ -5,6 +5,8 @@ from app.routers import webhook_router, admin_router, bot_router
 from app.database import engine, Base
 import logging
 import os
+from app.database import engine, Base, SessionLocal
+from app.core.init_admin import create_default_admin
 
 # Create logs directory if not exists
 os.makedirs(settings.LOG_DIR, exist_ok=True)
@@ -21,6 +23,15 @@ logging.basicConfig(
 
 # Create tables
 Base.metadata.create_all(bind=engine)
+# Create tables
+Base.metadata.create_all(bind=engine)
+
+# Create default admin if not exists
+db = SessionLocal()
+try:
+    create_default_admin(db)
+finally:
+    db.close()
 
 app = FastAPI(title=settings.APP_NAME)
 

@@ -11,6 +11,7 @@ from app.services.media_service import MediaService
 from app.schemas import schemas
 import os
 from pathlib import Path
+from sqlalchemy.sql import func
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 templates = Jinja2Templates(directory="app/templates")
@@ -18,22 +19,50 @@ templates = Jinja2Templates(directory="app/templates")
 # Login
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    return templates.TemplateResponse("admin/login.html", {"request": request})
+    return templates.TemplateResponse(
+    request=request,
+    name="admin/login.html",
+    context={
+        "request": request
+    }
+)
 
 @router.post("/login")
-async def login(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
-    # Simple: check against settings
-    if username == settings.ADMIN_USERNAME and verify_password(password, settings.ADMIN_PASSWORD_HASH):
-        request.session["user"] = username
-        # Update last_login
-        user = db.query(User).filter(User.username == username).first()
-        if user:
-            user.last_login = func.now()
-            db.commit()
-        return RedirectResponse("/admin/dashboard", status_code=302)
-    else:
-        return templates.TemplateResponse("admin/login.html", {"request": request, "error": "Invalid credentials"})
+async def login(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db),
+):
 
+    user = db.query(User).filter(User.username == username).first()
+
+    if not user:
+        return templates.TemplateResponse(
+            request,
+            "admin/login.html",
+            {"error": "Invalid credentials"},
+            status_code=401
+        )
+
+    if not verify_password(password, user.hashed_password):
+        return templates.TemplateResponse(
+            request,
+            "admin/login.html",
+            {"error": "Invalid credentials"},
+            status_code=401
+        )
+
+    request.session["user"] = user.username
+
+    user.last_login = func.now()
+    db.commit()
+
+    return RedirectResponse(
+        url="/admin/dashboard",
+        status_code=303
+    )
+    
 @router.get("/logout")
 async def logout(request: Request):
     request.session.clear()
@@ -48,8 +77,7 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
     total_categories = db.query(Category).count()
     total_unanswered = db.query(UnansweredMessage).filter(UnansweredMessage.is_resolved == False).count()
     recent_logs = db.query(ChatLog).order_by(ChatLog.created_at.desc()).limit(10).all()
-    return templates.TemplateResponse("admin/dashboard.html", {
-        "request": request,
+    return templates.TemplateResponse(request=request,name="admin/dashboard.html",  context={
         "total_keywords": total_keywords,
         "total_categories": total_categories,
         "total_unanswered": total_unanswered,
@@ -61,7 +89,7 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
 async def categories_list(request: Request, db: Session = Depends(get_db)):
     require_login(request)
     categories = db.query(Category).all()
-    return templates.TemplateResponse("admin/categories.html", {"request": request, "categories": categories})
+    return templates.TemplateResponse(request=request,name="admin/categories.html", context={ "categories": categories})
 
 @router.post("/categories")
 async def create_category(request: Request, name: str = Form(...), description: str = Form(""), db: Session = Depends(get_db)):
@@ -87,7 +115,7 @@ async def keywords_list(request: Request, db: Session = Depends(get_db)):
     require_login(request)
     keywords = db.query(Keyword).all()
     categories = db.query(Category).all()
-    return templates.TemplateResponse("admin/keywords.html", {"request": request, "keywords": keywords, "categories": categories})
+    return templates.TemplateResponse(request=request,name="admin/keywords.html", context={ "keywords": keywords, "categories": categories})
 
 @router.post("/keywords")
 async def create_keyword(request: Request,
@@ -120,7 +148,7 @@ async def create_keyword(request: Request,
 async def media_library(request: Request, db: Session = Depends(get_db)):
     require_login(request)
     media_files = db.query(Media).all()
-    return templates.TemplateResponse("admin/media.html", {"request": request, "media_files": media_files})
+    return templates.TemplateResponse(request=request,name="admin/media.html", context={"media_files": media_files})
 
 @router.post("/media/upload")
 async def upload_media(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db)):
@@ -141,14 +169,14 @@ async def delete_media(id: int, db: Session = Depends(get_db)):
 async def chat_logs(request: Request, db: Session = Depends(get_db)):
     require_login(request)
     logs = db.query(ChatLog).order_by(ChatLog.created_at.desc()).limit(100).all()
-    return templates.TemplateResponse("admin/logs.html", {"request": request, "logs": logs})
+    return templates.TemplateResponse(request=request,name="admin/logs.html", context={ "logs": logs})
 
 # Unanswered
 @router.get("/unanswered", response_class=HTMLResponse)
 async def unanswered_list(request: Request, db: Session = Depends(get_db)):
     require_login(request)
     unanswered = db.query(UnansweredMessage).filter(UnansweredMessage.is_resolved == False).all()
-    return templates.TemplateResponse("admin/unanswered.html", {"request": request, "unanswered": unanswered})
+    return templates.TemplateResponse(request=request,name="admin/unanswered.html", context={ "unanswered": unanswered})
 
 @router.post("/unanswered/{id}/resolve")
 async def resolve_unanswered(id: int, db: Session = Depends(get_db)):
@@ -157,20 +185,20 @@ async def resolve_unanswered(id: int, db: Session = Depends(get_db)):
     if msg:
         msg.is_resolved = True
         db.commit()
-    return RedirectResponse("/admin/unanswered", status_code=302)
+    return RedirectResponse(request=request,name="/admin/unanswered", status_code=302)
 
 # Versions
 @router.get("/versions", response_class=HTMLResponse)
 async def versions_list(request: Request, db: Session = Depends(get_db)):
     require_login(request)
     versions = db.query(Version).order_by(Version.changed_at.desc()).limit(50).all()
-    return templates.TemplateResponse("admin/versions.html", {"request": request, "versions": versions})
+    return templates.TemplateResponse(request=request,name="admin/versions.html", context={ "versions": versions})
 
 # Settings (simple)
 @router.get("/settings", response_class=HTMLResponse)
 async def settings_page(request: Request, db: Session = Depends(get_db)):
     require_login(request)
-    return templates.TemplateResponse("admin/settings.html", {"request": request})
+    return templates.TemplateResponse(request=request,name="admin/settings.html", context={ "fallback_reply": settings.FALLBACK_REPLY})
 
 @router.post("/settings")
 async def update_settings(request: Request, fallback_reply: str = Form(...), db: Session = Depends(get_db)):

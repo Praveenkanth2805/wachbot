@@ -11,7 +11,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/", response_class=HTMLResponse)
 async def bot_page(request: Request):
-    return templates.TemplateResponse("bot.html", {"request": request})
+    return templates.TemplateResponse("bot.html", context={"request": request})
 
 @router.post("/message")
 async def bot_message(request: Request, message: str = Form(...), db: Session = Depends(get_db)):
