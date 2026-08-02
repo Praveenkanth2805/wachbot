@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Media Library</h1>
+<div class="bg-white p-6 rounded shadow mb-6">
+    <form method="post" enctype="multipart/form-data" action="/admin/media/upload">
+        <input type="file" name="file" required class="border p-2">
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Upload</button>
+    </form>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    {% for media in media_files %}
+    <div class="bg-white p-4 rounded shadow">
+        <p><strong>{{ media.original_name }}</strong></p>
+        <p class="text-sm text-gray-500">{{ media.mime_type }} - {{ media.size }} bytes</p>
+        <a href="/admin/media/{{ media.id }}/delete" onclick="return confirm('Delete?')" class="text-red-600 hover:text-red-800 text-sm">Delete</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

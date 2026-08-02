@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Settings</h1>
+<div class="bg-white p-6 rounded shadow">
+    <form method="post">
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Fallback Reply</label>
+            <input type="text" name="fallback_reply" value="{{ settings.FALLBACK_REPLY }}" class="border rounded w-full p-2">
+        </div>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+    </form>
+</div>
+{% endblock %}

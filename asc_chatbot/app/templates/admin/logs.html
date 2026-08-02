@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Chat Logs</h1>
+<table class="min-w-full bg-white shadow rounded">
+    <thead>
+        <tr>
+            <th class="py-2 px-4 border-b">User</th>
+            <th class="py-2 px-4 border-b">Message</th>
+            <th class="py-2 px-4 border-b">Language</th>
+            <th class="py-2 px-4 border-b">Reply</th>
+            <th class="py-2 px-4 border-b">Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td class="py-2 px-4 border-b">{{ log.session_id }}</td>
+            <td class="py-2 px-4 border-b">{{ log.user_message }}</td>
+            <td class="py-2 px-4 border-b">{{ log.detected_language }}</td>
+            <td class="py-2 px-4 border-b">{{ log.reply_text or 'Media' }}</td>
+            <td class="py-2 px-4 border-b">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

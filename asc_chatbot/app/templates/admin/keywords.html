@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Keywords</h1>
+<div class="bg-white p-6 rounded shadow mb-6">
+    <form method="post" class="grid grid-cols-2 gap-4">
+        <input type="text" name="pattern" placeholder="Pattern" class="border rounded p-2" required>
+        <select name="match_type" class="border rounded p-2">
+            <option value="exact">Exact</option>
+            <option value="contains" selected>Contains</option>
+            <option value="starts">Starts With</option>
+            <option value="ends">Ends With</option>
+            <option value="regex">Regex</option>
+        </select>
+        <input type="number" name="priority" placeholder="Priority" value="0" class="border rounded p-2">
+        <select name="language" class="border rounded p-2">
+            <option value="en">English</option>
+            <option value="ta">Tamil</option>
+        </select>
+        <select name="category_id" class="border rounded p-2">
+            <option value="">No Category</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+        <div class="col-span-2 grid grid-cols-2 gap-4">
+            <select name="response_type" class="border rounded p-2">
+                <option value="text">Text</option>
+                <option value="image">Image</option>
+                <option value="pdf">PDF</option>
+                <option value="video">Video</option>
+                <option value="audio">Audio</option>
+                <option value="document">Document</option>
+            </select>
+            <input type="text" name="response_text" placeholder="Response Text (or media ID)" class="border rounded p-2">
+        </div>
+        <button type="submit" class="col-span-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Add Keyword</button>
+    </form>
+</div>
+<table class="min-w-full bg-white shadow rounded">
+    <thead>
+        <tr>
+            <th class="py-2 px-4 border-b">Pattern</th>
+            <th class="py-2 px-4 border-b">Type</th>
+            <th class="py-2 px-4 border-b">Priority</th>
+            <th class="py-2 px-4 border-b">Lang</th>
+            <th class="py-2 px-4 border-b">Category</th>
+            <th class="py-2 px-4 border-b">Active</th>
+            <th class="py-2 px-4 border-b">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for kw in keywords %}
+        <tr>
+            <td class="py-2 px-4 border-b">{{ kw.pattern }}</td>
+            <td class="py-2 px-4 border-b">{{ kw.match_type.value }}</td>
+            <td class="py-2 px-4 border-b">{{ kw.priority }}</td>
+            <td class="py-2 px-4 border-b">{{ kw.language }}</td>
+            <td class="py-2 px-4 border-b">{{ kw.category.name if kw.category else '' }}</td>
+            <td class="py-2 px-4 border-b">{{ kw.is_active }}</td>
+            <td class="py-2 px-4 border-b">
+                <a href="#" class="text-blue-600 hover:text-blue-800">Edit</a>
+                <a href="#" onclick="return confirm('Delete?')" class="text-red-600 hover:text-red-800 ml-2">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

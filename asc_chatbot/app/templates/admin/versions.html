@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Version History</h1>
+<table class="min-w-full bg-white shadow rounded">
+    <thead>
+        <tr>
+            <th class="py-2 px-4 border-b">Keyword ID</th>
+            <th class="py-2 px-4 border-b">Changed By</th>
+            <th class="py-2 px-4 border-b">Old Text</th>
+            <th class="py-2 px-4 border-b">New Text</th>
+            <th class="py-2 px-4 border-b">Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ver in versions %}
+        <tr>
+            <td class="py-2 px-4 border-b">{{ ver.keyword_id }}</td>
+            <td class="py-2 px-4 border-b">{{ ver.changed_by or 'system' }}</td>
+            <td class="py-2 px-4 border-b">{{ ver.old_text or '' }}</td>
+            <td class="py-2 px-4 border-b">{{ ver.new_text or '' }}</td>
+            <td class="py-2 px-4 border-b">{{ ver.changed_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Unanswered Messages</h1>
+<table class="min-w-full bg-white shadow rounded">
+    <thead>
+        <tr>
+            <th class="py-2 px-4 border-b">User</th>
+            <th class="py-2 px-4 border-b">Message</th>
+            <th class="py-2 px-4 border-b">Language</th>
+            <th class="py-2 px-4 border-b">Time</th>
+            <th class="py-2 px-4 border-b">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for msg in unanswered %}
+        <tr>
+            <td class="py-2 px-4 border-b">{{ msg.session_id }}</td>
+            <td class="py-2 px-4 border-b">{{ msg.message }}</td>
+            <td class="py-2 px-4 border-b">{{ msg.language }}</td>
+            <td class="py-2 px-4 border-b">{{ msg.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="py-2 px-4 border-b">
+                <form method="post" action="/admin/unanswered/{{ msg.id }}/resolve">
+                    <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700">Resolve</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
